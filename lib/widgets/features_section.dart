@@ -2,6 +2,43 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import 'scroll_reveal.dart';
 
+class _HoverGlowWrapper extends StatefulWidget {
+  final Widget child;
+  const _HoverGlowWrapper({required this.child});
+
+  @override
+  State<_HoverGlowWrapper> createState() => _HoverGlowWrapperState();
+}
+
+class _HoverGlowWrapperState extends State<_HoverGlowWrapper> {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: _hovered
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.22),
+                    blurRadius: 32,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : [],
+        ),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
 class FeaturesSection extends StatelessWidget {
   const FeaturesSection({super.key});
 
@@ -56,7 +93,7 @@ class FeaturesSection extends StatelessWidget {
                           child: ScrollReveal(
                             delay: const Duration(milliseconds: 100),
                             slideOffset: 40,
-                            child: _buildApiCard(),
+                            child: _HoverGlowWrapper(child: _buildApiCard()),
                           ),
                         ),
                         const SizedBox(width: 24),
@@ -64,18 +101,18 @@ class FeaturesSection extends StatelessWidget {
                           child: ScrollReveal(
                             delay: const Duration(milliseconds: 220),
                             slideOffset: 40,
-                            child: _buildNoCodeCard(),
+                            child: _HoverGlowWrapper(child: _buildNoCodeCard()),
                           ),
                         ),
                       ],
                     )
                   : Column(
                       children: [
-                        ScrollReveal(child: _buildApiCard()),
+                        ScrollReveal(child: _HoverGlowWrapper(child: _buildApiCard())),
                         const SizedBox(height: 24),
                         ScrollReveal(
                           delay: const Duration(milliseconds: 120),
-                          child: _buildNoCodeCard(),
+                          child: _HoverGlowWrapper(child: _buildNoCodeCard()),
                         ),
                       ],
                     ),

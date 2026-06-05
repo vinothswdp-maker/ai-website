@@ -5,6 +5,7 @@ import 'typewriter_text.dart';
 import 'cursor_spotlight.dart';
 import 'audio_waveform.dart';
 import 'magnetic_button.dart';
+import 'floating_particles.dart';
 
 class HeroSection extends StatefulWidget {
   const HeroSection({super.key});
@@ -55,9 +56,14 @@ class _HeroSectionState extends State<HeroSection>
         children: [
           _buildGridPattern(),
           _buildGlowEffect(),
+          const Positioned.fill(child: FloatingParticles(count: 22)),
           const Positioned(
             bottom: 0, left: 0, right: 0,
             child: AudioWaveform(height: 80),
+          ),
+          const Positioned(
+            bottom: 24, left: 0, right: 0,
+            child: _BouncingArrow(),
           ),
           Center(
             child: ConstrainedBox(
@@ -191,18 +197,8 @@ class _HeroSectionState extends State<HeroSection>
   }
 
   Widget _buildHeadline(bool isMobile) {
-    return TypewriterText(
-      text: 'Build human-like\nvoice AI agents',
-      textAlign: isMobile ? TextAlign.center : TextAlign.left,
-      startDelay: const Duration(milliseconds: 400),
-      charDelay: const Duration(milliseconds: 38),
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: isMobile ? 34 : 54,
-        fontWeight: FontWeight.w800,
-        height: 1.1,
-        letterSpacing: -2,
-      ),
+    return _GradientHeadline(
+      isMobile: isMobile,
     );
   }
 
@@ -230,7 +226,7 @@ class _HeroSectionState extends State<HeroSection>
           child: _PrimaryCtaButton(
             label: 'Start for free',
             sublabel: '\$10 in free credits',
-            onTap: () {},
+            onTap: () => Navigator.pushNamed(context, '/signup'),
           ),
         ),
         MagneticButton(
@@ -1204,6 +1200,126 @@ class _GridPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+// ─── Gradient Headline ────────────────────────────────────────────────────
+
+class _GradientHeadline extends StatefulWidget {
+  final bool isMobile;
+  const _GradientHeadline({required this.isMobile});
+
+  @override
+  State<_GradientHeadline> createState() => _GradientHeadlineState();
+}
+
+class _GradientHeadlineState extends State<_GradientHeadline>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 3),
+    )..repeat();
+    _anim = Tween<double>(begin: -1.0, end: 2.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, child) => ShaderMask(
+        blendMode: BlendMode.srcIn,
+        shaderCallback: (bounds) => LinearGradient(
+          begin: Alignment(_anim.value - 1, 0),
+          end: Alignment(_anim.value + 1, 0),
+          colors: const [
+            Colors.white,
+            Colors.white,
+            AppColors.primary,
+            Color(0xFFFFD580),
+            Colors.white,
+            Colors.white,
+          ],
+          stops: const [0.0, 0.3, 0.45, 0.55, 0.7, 1.0],
+        ).createShader(bounds),
+        child: child,
+      ),
+      child: TypewriterText(
+        text: 'Build human-like\nvoice AI agents',
+        textAlign:
+            widget.isMobile ? TextAlign.center : TextAlign.left,
+        startDelay: const Duration(milliseconds: 400),
+        charDelay: const Duration(milliseconds: 38),
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: widget.isMobile ? 34 : 54,
+          fontWeight: FontWeight.w800,
+          height: 1.1,
+          letterSpacing: -2,
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Bouncing Scroll Arrow ────────────────────────────────────────────────
+
+class _BouncingArrow extends StatefulWidget {
+  const _BouncingArrow();
+
+  @override
+  State<_BouncingArrow> createState() => _BouncingArrowState();
+}
+
+class _BouncingArrowState extends State<_BouncingArrow>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double> _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _anim = Tween<double>(begin: 0, end: 10).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _anim,
+      builder: (_, _) => Transform.translate(
+        offset: Offset(0, _anim.value),
+        child: Icon(
+          Icons.keyboard_arrow_down_rounded,
+          color: Colors.white.withValues(alpha: 0.35),
+          size: 28,
+        ),
+      ),
+    );
+  }
 }
 
 // ─── Conversation Ticker Data ─────────────────────────────────────────────

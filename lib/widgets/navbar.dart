@@ -9,13 +9,23 @@ class Navbar extends StatefulWidget {
   State<Navbar> createState() => _NavbarState();
 }
 
-class _NavbarState extends State<Navbar> {
+class _NavbarState extends State<Navbar> with SingleTickerProviderStateMixin {
   bool _scrolled = false;
   String? _hoveredItem;
   ScrollController? _sc;
   VoidCallback? _listener;
+  late AnimationController _staggerCtrl;
 
   static const _navItems = ['AI Agents', 'Platform', 'Docs', 'Pricing'];
+
+  @override
+  void initState() {
+    super.initState();
+    _staggerCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 600),
+    )..forward();
+  }
 
   @override
   void didChangeDependencies() {
@@ -37,6 +47,7 @@ class _NavbarState extends State<Navbar> {
   @override
   void dispose() {
     if (_listener != null) _sc?.removeListener(_listener!);
+    _staggerCtrl.dispose();
     super.dispose();
   }
 
@@ -70,8 +81,10 @@ class _NavbarState extends State<Navbar> {
                   children: [
                     _buildLogo(),
                     const SizedBox(width: 40),
-                    if (isDesktop)
-                      ..._navItems.map(_buildNavItem),
+                                    if (isDesktop)
+                      ..._navItems.asMap().entries.map(
+                        (e) => _buildNavItem(e.value, e.key),
+                      ),
                     const Spacer(),
                     if (isDesktop) ...[
                       _buildTextBtn('Login'),
@@ -117,9 +130,22 @@ class _NavbarState extends State<Navbar> {
     );
   }
 
-  Widget _buildNavItem(String label) {
+  Widget _buildNavItem(String label, [int index = 0]) {
+    final start = index * 0.15;
+    final end = (start + 0.55).clamp(0.0, 1.0);
+    final anim = CurvedAnimation(
+      parent: _staggerCtrl,
+      curve: Interval(start, end, curve: Curves.easeOut),
+    );
     final isHovered = _hoveredItem == label;
-    return MouseRegion(
+    return FadeTransition(
+      opacity: anim,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, -0.4),
+          end: Offset.zero,
+        ).animate(anim),
+        child: MouseRegion(
       onEnter: (_) => setState(() => _hoveredItem = label),
       onExit: (_) => setState(() => _hoveredItem = null),
       child: Padding(
@@ -150,9 +176,11 @@ class _NavbarState extends State<Navbar> {
               ),
             ],
           ),
-        ),
-      ),
-    );
+        ),   // TextButton
+      ),     // Padding
+    ),       // MouseRegion
+  ),         // SlideTransition
+);           // FadeTransition
   }
 
   Widget _buildTextBtn(String label) => TextButton(
@@ -205,7 +233,7 @@ class _NavCtaState extends State<_NavCta> {
               : [],
         ),
         child: TextButton(
-          onPressed: () {},
+          onPressed: () => Navigator.pushNamed(context, '/signup'),
           style: TextButton.styleFrom(
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),

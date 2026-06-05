@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
+import 'screens/signup_screen.dart';
 
 void main() {
   runApp(const PulseApp());
@@ -36,6 +37,9 @@ class PulseApp extends StatelessWidget {
         ),
       ),
       home: const HomeScreen(),
+      routes: {
+        '/signup': (_) => const SignupScreen(),
+      },
     );
   }
 }

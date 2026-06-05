@@ -186,7 +186,10 @@ class _PillarCardState extends State<_PillarCard> {
             width: 1.5,
           ),
           boxShadow: _hovered
-              ? [BoxShadow(color: color.withValues(alpha: 0.12), blurRadius: 24, offset: const Offset(0, 8))]
+              ? [
+                  BoxShadow(color: color.withValues(alpha: 0.22), blurRadius: 36, spreadRadius: 2, offset: const Offset(0, 10)),
+                  BoxShadow(color: AppColors.primary.withValues(alpha: 0.10), blurRadius: 60, spreadRadius: 0, offset: const Offset(0, 20)),
+                ]
               : [],
         ),
         child: Column(

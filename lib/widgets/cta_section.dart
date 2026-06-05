@@ -96,7 +96,7 @@ class _ShimmerButtonState extends State<_ShimmerButton>
     return AnimatedBuilder(
       animation: _anim,
       builder: (_, _) => GestureDetector(
-        onTap: () {},
+        onTap: () => Navigator.pushNamed(context, '/signup'),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(10),
           child: Stack(
